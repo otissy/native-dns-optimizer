@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NativeDnsOptimizer.Cli</RootNamespace>
+    <AssemblyName>native-dns-optimizer</AssemblyName>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Program\Models\DnsServer.cs" Link="Models\DnsServer.cs" />
+    <Compile Include="..\Program\Services\DnsCatalog.cs" Link="Services\DnsCatalog.cs" />
+    <Compile Include="..\Program\Services\DnsBenchmarkService.cs" Link="Services\DnsBenchmarkService.cs" />
+  </ItemGroup>
+
+</Project>

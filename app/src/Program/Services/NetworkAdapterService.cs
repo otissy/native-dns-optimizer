@@ -170,9 +170,12 @@ public sealed class NetworkAdapterService
         {
             try
             {
-                string script = "$props = @('Green Ethernet', 'Power Saving Mode', 'Gigabit Lite', 'Energy-Efficient Ethernet', 'Advanced EEE'); " +
-                                "foreach ($p in $props) { Set-NetAdapterAdvancedProperty -Name 'Ethernet*' -DisplayName $p -DisplayValue 'Disabled' -ErrorAction SilentlyContinue }; " +
-                                "Set-NetAdapterAdvancedProperty -Name 'Ethernet*' -DisplayName 'Receive Side Scaling' -DisplayValue 'Enabled' -ErrorAction SilentlyContinue; " +
+                string script = "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
+                                "$props = @('Green Ethernet', 'Power Saving Mode', 'Gigabit Lite', 'Energy-Efficient Ethernet', 'Advanced EEE'); " +
+                                "foreach ($a in $adapters) { " +
+                                "    foreach ($p in $props) { Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName $p -DisplayValue 'Disabled' -ErrorAction SilentlyContinue }; " +
+                                "    Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Receive Side Scaling' -DisplayValue 'Enabled' -ErrorAction SilentlyContinue; " +
+                                "}; " +
                                 "netsh int tcp set global autotuninglevel=normal; " +
                                 "netsh int tcp set global rss=enabled; " +
                                 "netsh int tcp set global fastopen=enabled; " +

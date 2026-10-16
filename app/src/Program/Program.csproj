@@ -6,9 +6,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NativeDnsOptimizer</RootNamespace>
-    <AssemblyName>NativeDnsOptimizer</AssemblyName>
+    <AssemblyName>PDNO</AssemblyName>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>..\..\..\assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="..\..\..\assets\icon.png" Link="assets\icon.png" />
+  </ItemGroup>
 
 </Project>

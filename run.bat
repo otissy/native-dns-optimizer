@@ -1,2 +1,2 @@
 @echo off
-start "" "%~dp0NativeDnsOptimizer.exe"
+start "" "%~dp0PDNO.exe"

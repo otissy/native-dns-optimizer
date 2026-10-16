@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
+using System.Threading;
 
 namespace NativeDnsOptimizer.Models;
 
@@ -82,10 +82,10 @@ public sealed class DnsServer : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? prop = null)
     {
-        var app = Application.Current;
-        if (app?.Dispatcher is not null && !app.Dispatcher.CheckAccess())
+        var sync = SynchronizationContext.Current;
+        if (sync is not null)
         {
-            app.Dispatcher.BeginInvoke(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop)));
+            sync.Post(_ => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop)), null);
         }
         else
         {
