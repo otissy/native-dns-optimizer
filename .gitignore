@@ -1,0 +1,20 @@
+# Build outputs
+bin/
+obj/
+dist/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / IDE
+.vs/
+.vscode/
+*.swp
+*.lock
+
+# Logs
+*.log
