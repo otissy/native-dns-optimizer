@@ -211,4 +211,13 @@ public partial class MainWindow : Window
         _displayedServers = new ObservableCollection<DnsServer>(filtered);
         ServersGrid.ItemsSource = _displayedServers;
     }
+
+    private void ConsoleGuideBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var guide = new ConsoleWindow(_winnerServer)
+        {
+            Owner = this
+        };
+        guide.ShowDialog();
+    }
 }

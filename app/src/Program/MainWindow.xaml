@@ -144,8 +144,11 @@
                               SelectionChanged="AdapterCombo_SelectionChanged" DisplayMemberPath="DisplayText"/>
                 </StackPanel>
                 <Button x:Name="MaximizeNicBtn" Content="⚡ Maximize Adapters" Style="{StaticResource SecondaryBtn}" 
-                        Height="32" Margin="0,16,0,0" Click="MaximizeNicBtn_Click" 
+                        Height="32" Margin="0,16,8,0" Click="MaximizeNicBtn_Click" 
                         ToolTip="Disables Green Ethernet and power-saving jitter throttling on physical NICs"/>
+                <Button x:Name="ConsoleGuideBtnTop" Content="🎮 PS5 / Xbox" Style="{StaticResource SecondaryBtn}" 
+                        Height="32" Margin="0,16,0,0" Click="ConsoleGuideBtn_Click" 
+                        ToolTip="Setup instructions for PlayStation 5, PS4, Xbox Series X|S &amp; Xbox One"/>
             </StackPanel>
         </Grid>
 
@@ -188,6 +191,9 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="ConsoleGuideBtn" Content="🎮 Console Setup" Style="{StaticResource SecondaryBtn}" 
+                            Height="38" Margin="0,0,8,0" Click="ConsoleGuideBtn_Click"
+                            ToolTip="Setup this winning DNS on PlayStation 5, PS4, Xbox Series X|S &amp; Xbox One"/>
                     <Button x:Name="ApplyWinnerBtn" Content="🔒 Lock As Static DNS On All Adapters" Style="{StaticResource PrimaryBtn}" 
                             Height="38" Margin="0,0,8,0" Click="ApplyWinnerBtn_Click"/>
                 </StackPanel>

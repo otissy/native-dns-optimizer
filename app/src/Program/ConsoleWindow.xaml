@@ -1,0 +1,166 @@
+<Window x:Class="NativeDnsOptimizer.ConsoleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PDNO - PlayStation &amp; Xbox Optimization Guide" 
+        Height="650" Width="820"
+        WindowStartupLocation="CenterOwner"
+        Background="#0d1117"
+        Foreground="#f0f6fc"
+        FontFamily="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto"
+        ResizeMode="NoResize">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="🎮" FontSize="26" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <TextBlock Text="Console DNS Optimization (PS5 / PS4 &amp; Xbox)" FontSize="20" FontWeight="Bold" Foreground="#ffffff"/>
+            </StackPanel>
+            <TextBlock Text="Apply the lowest-jitter static DNS to your gaming consoles to eliminate lobby ping spikes and matchmaking delays." 
+                       Foreground="#8b949e" FontSize="13" Margin="38,4,0,0"/>
+        </StackPanel>
+
+        <!-- Fast Static DNS Card -->
+        <Border Grid.Row="1" Background="#161b22" BorderBrush="#10b981" BorderThickness="1.5" CornerRadius="8" Padding="18,14" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="RECOMMENDED CONSOLE STATIC RESOLVER" Foreground="#10b981" FontWeight="Bold" FontSize="11"/>
+                    <TextBlock x:Name="ConsoleWinnerName" Text="Cloudflare Gaming Anycast (1.1.1.1)" Foreground="#ffffff" FontWeight="Bold" FontSize="16" Margin="0,4,0,6"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Primary DNS: " Foreground="#8b949e" FontSize="12"/>
+                        <TextBlock x:Name="ConsolePrimaryText" Text="1.1.1.1" Foreground="#38bdf8" FontWeight="Bold" FontSize="13" Margin="0,0,24,0"/>
+                        <TextBlock Text="Secondary DNS: " Foreground="#8b949e" FontSize="12"/>
+                        <TextBlock x:Name="ConsoleSecondaryText" Text="1.0.0.1" Foreground="#38bdf8" FontWeight="Bold" FontSize="13"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="📋 Copy DNS IPs" Background="#21262d" Foreground="#38bdf8" BorderBrush="#30363d" 
+                        Padding="14,8" FontWeight="SemiBold" FontSize="12" Click="CopyDnsBtn_Click" Cursor="Hand"/>
+            </Grid>
+        </Border>
+
+        <!-- Console Selection Tabs -->
+        <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="TabBorder" Background="#161b22" BorderBrush="#30363d" BorderThickness="1,1,1,0" 
+                                        CornerRadius="6,6,0,0" Margin="0,0,6,0" Padding="18,8" Cursor="Hand">
+                                    <ContentPresenter ContentSource="Header" TextElement.FontWeight="SemiBold" TextElement.FontSize="13"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="TabBorder" Property="Background" Value="#21262d"/>
+                                        <Setter TargetName="TabBorder" Property="BorderBrush" Value="#10b981"/>
+                                        <Setter Property="Foreground" Value="#10b981"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter Property="Foreground" Value="#8b949e"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- PlayStation Tab -->
+            <TabItem Header="PlayStation 5 &amp; PS4">
+                <Border Background="#161b22" BorderBrush="#30363d" BorderThickness="1" CornerRadius="0,6,6,6" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="PlayStation Step-by-Step Configuration" FontWeight="Bold" FontSize="15" Foreground="#ffffff" Margin="0,0,0,14"/>
+
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="1. On your PS5 / PS4 home screen, select Settings (gear icon) > Network." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="2. Go to Settings > Set Up Internet Connection." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="3. Highlight your connected Wi-Fi or LAN Cable network, press Options button (three lines) > Advanced Settings." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="4. Select DNS Settings and change from 'Automatic' to 'Manual'." Foreground="#38bdf8" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="5. Set Primary DNS to 1.1.1.1 and Secondary DNS to 1.0.0.1 (or 9.9.9.9 / 149.112.112.112 for Quad9)." Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10">
+                            <TextBlock Text="6. Leave MTU on Automatic, save, and select 'Test Internet Connection' to verify reduced ping." Foreground="#8b949e" FontSize="13"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <!-- Xbox Tab -->
+            <TabItem Header="Xbox Series X|S &amp; One">
+                <Border Background="#161b22" BorderBrush="#30363d" BorderThickness="1" CornerRadius="0,6,6,6" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Xbox Step-by-Step Configuration" FontWeight="Bold" FontSize="15" Foreground="#ffffff" Margin="0,0,0,14"/>
+
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="1. Press the Xbox button on your controller to open the guide." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="2. Select Profile &amp; system > Settings > General > Network settings." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="3. Select Advanced settings > DNS settings > Manual." Foreground="#38bdf8" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="4. Enter Primary IPv4 DNS: 1.1.1.1 and press Enter." Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="5. Enter Secondary IPv4 DNS: 1.0.0.1 and press Enter." Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10">
+                            <TextBlock Text="6. Press B to save. Run 'Test network connection' and 'Test multiplayer connection'." Foreground="#8b949e" FontSize="13"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <!-- Home Router Tab -->
+            <TabItem Header="Router (All Consoles at Once)">
+                <Border Background="#161b22" BorderBrush="#30363d" BorderThickness="1" CornerRadius="0,6,6,6" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Optimize All Consoles Simultaneously Via Your Home Router" FontWeight="Bold" FontSize="15" Foreground="#ffffff" Margin="0,0,0,10"/>
+                        <TextBlock Text="Setting the DNS on your router applies the sub-20ms stable ping to your PS5, Xbox, Nintendo Switch, and PC all at once with zero configuration per device." 
+                                   Foreground="#8b949e" FontSize="12" Margin="0,0,0,14" TextWrapping="Wrap"/>
+
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="1. Open your browser and go to your router gateway: http://192.168.1.1 or http://192.168.0.1" Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="2. Log in and navigate to WAN / Internet or DHCP Server settings." Foreground="#f0f6fc" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10" Margin="0,0,0,10">
+                            <TextBlock Text="3. Set DNS 1 to 1.1.1.1 and DNS 2 to 1.0.0.1 (or EU sovereign DNS4EU: 86.54.11.100)." Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+                        <Border Background="#0d1117" CornerRadius="6" Padding="14,10">
+                            <TextBlock Text="4. Save &amp; Reboot router. All connected consoles automatically receive the optimized Anycast routing." Foreground="#8b949e" FontSize="13"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <!-- Footer -->
+        <Button Grid.Row="3" Content="Done" Width="100" Height="36" HorizontalAlignment="Right" Margin="0,14,0,0" 
+                Background="#21262d" Foreground="#ffffff" BorderBrush="#30363d" Click="CloseBtn_Click" Cursor="Hand"/>
+    </Grid>
+</Window>

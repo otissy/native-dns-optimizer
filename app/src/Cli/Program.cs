@@ -79,6 +79,13 @@ public static class Program
         Console.WriteLine($"   Security:    {winner.Tag} ({winner.Country})");
         Console.WriteLine("--------------------------------------------------------------------------------");
 
+        bool showConsole = args.Contains("--console") || args.Contains("-c");
+
+        if (showConsole)
+        {
+            PrintConsoleGuide(winner);
+        }
+
         if (apply)
         {
             ApplyDns(winner);
@@ -93,9 +100,45 @@ public static class Program
             }
             else
             {
-                Console.WriteLine($"  .\\NativeDnsOptimizer.exe");
+                Console.WriteLine($"  .\\PDNO.exe");
+            }
+            if (!showConsole)
+            {
+                Console.WriteLine("To view PlayStation & Xbox console setup instructions, run with '--console' (-c).");
             }
         }
+    }
+
+    private static void PrintConsoleGuide(DnsServer winner)
+    {
+        string sec = string.IsNullOrWhiteSpace(winner.SecondaryIp) ? winner.PrimaryIp : winner.SecondaryIp;
+        Console.WriteLine();
+        Console.WriteLine("================================================================================");
+        Console.WriteLine("           🎮 CONSOLE OPTIMIZATION GUIDE (PlayStation 5/4 & Xbox)               ");
+        Console.WriteLine("================================================================================");
+        Console.WriteLine($" RECOMMENDED RESOLVER: {winner.Name}");
+        Console.WriteLine($" Primary DNS:   {winner.PrimaryIp}");
+        Console.WriteLine($" Secondary DNS: {sec}");
+        Console.WriteLine();
+        Console.WriteLine("--- PlayStation 5 / PlayStation 4 ---");
+        Console.WriteLine("1. Settings (gear icon) > Network > Settings > Set Up Internet Connection.");
+        Console.WriteLine("2. Highlight your connection > Press Options (three lines) > Advanced Settings.");
+        Console.WriteLine("3. DNS Settings: Change to 'Manual'.");
+        Console.WriteLine($"4. Primary DNS: {winner.PrimaryIp} | Secondary DNS: {sec}");
+        Console.WriteLine("5. Save and run 'Test Internet Connection' to confirm low-latency routing.");
+        Console.WriteLine();
+        Console.WriteLine("--- Xbox Series X|S / Xbox One ---");
+        Console.WriteLine("1. Press Xbox guide button > Profile & system > Settings > General > Network settings.");
+        Console.WriteLine("2. Advanced settings > DNS settings > Manual.");
+        Console.WriteLine($"3. Primary IPv4 DNS: {winner.PrimaryIp} | Secondary IPv4 DNS: {sec}");
+        Console.WriteLine("4. Save and run 'Test network connection' & 'Test multiplayer connection'.");
+        Console.WriteLine();
+        Console.WriteLine("--- Router (Optimizes All Consoles + PC Simultaneously) ---");
+        Console.WriteLine("1. Access your router admin dashboard (e.g. http://192.168.1.1 or 192.168.0.1).");
+        Console.WriteLine("2. Navigate to WAN / DHCP Settings.");
+        Console.WriteLine($"3. Set Static DNS: Primary = {winner.PrimaryIp}, Secondary = {sec}");
+        Console.WriteLine("4. Reboot router. All gaming devices on your home network will inherit this Anycast routing.");
+        Console.WriteLine("================================================================================");
     }
 
     private static void ApplyDns(DnsServer winner)
@@ -121,19 +164,21 @@ public static class Program
         }
         else
         {
-            Console.WriteLine("Please launch NativeDnsOptimizer.exe to apply with Administrator privileges.");
+            Console.WriteLine("Please launch PDNO.exe to apply with Administrator privileges.");
         }
     }
 
     private static void PrintHelp()
     {
-        Console.WriteLine("Native DNS Optimizer - Command Line Interface");
+        Console.WriteLine("PDNO (PC DNS Network Optimizer) - Command Line Interface");
         Console.WriteLine();
-        Console.WriteLine("Usage: native-dns-optimizer [options]");
+        Console.WriteLine("Usage: PDNO-linux-x64 [options]  (or native-dns-optimizer [options])");
         Console.WriteLine();
         Console.WriteLine("Options:");
-        Console.WriteLine("  --eu       Filter exclusively to European Cybersecurity (NIS2/GDPR) compliant resolvers");
-        Console.WriteLine("  --apply    Automatically apply the winning resolver to your active network interface");
-        Console.WriteLine("  --help     Show this help screen");
+        Console.WriteLine("  --eu         Filter exclusively to European Cybersecurity (NIS2/GDPR) compliant resolvers");
+        Console.WriteLine("  --console    Display step-by-step setup guides for PlayStation 5/4 and Xbox Series/One");
+        Console.WriteLine("  -c           Shorthand for --console");
+        Console.WriteLine("  --apply      Automatically apply the winning resolver to your active network interface");
+        Console.WriteLine("  --help, -h   Show this help screen");
     }
 }
