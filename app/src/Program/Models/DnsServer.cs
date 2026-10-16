@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace NativeDnsOptimizer.Models;
 
@@ -22,10 +23,6 @@ public sealed class DnsServer : INotifyPropertyChanged
     public string DohUrl { get; init; } = "";
     public string Tag { get; init; } = "General";
     public string Description { get; init; } = "";
-    
-    /// <summary>
-    /// Complies with European Cybersecurity Protocols (NIS2 Directive, GDPR, ENISA DNSSEC, EU Data Jurisdiction).
-    /// </summary>
     public bool IsEuCompliant { get; init; } = false;
 
     public int Rank
@@ -84,5 +81,15 @@ public sealed class DnsServer : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? prop = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+    {
+        var app = Application.Current;
+        if (app?.Dispatcher is not null && !app.Dispatcher.CheckAccess())
+        {
+            app.Dispatcher.BeginInvoke(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop)));
+        }
+        else
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+    }
 }
