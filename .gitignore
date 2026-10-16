@@ -2,6 +2,9 @@
 bin/
 obj/
 dist/
+publish/
+*.exe
+*.pdb
 
 # User-specific files
 *.rsuser

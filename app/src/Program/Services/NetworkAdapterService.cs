@@ -1,12 +1,17 @@
 using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using NativeDnsOptimizer.Models;
 
 namespace NativeDnsOptimizer.Services;
 
 public sealed class NetworkAdapterService
 {
+    private static readonly Regex SafeAdapterNameRegex = new(@"^[a-zA-Z0-9\s\-_.()]+$", RegexOptions.Compiled);
+
     public List<NetworkAdapterInfo> GetPhysicalAdapters()
     {
         var list = new List<NetworkAdapterInfo>();
@@ -56,8 +61,38 @@ public sealed class NetworkAdapterService
         return list;
     }
 
+    /// <summary>
+    /// Applies static DNS securely with strict validation preventing command injection.
+    /// </summary>
     public async Task<bool> ApplyDnsAsync(string? specificAdapter, string primaryIp, string secondaryIp, bool applyToAll)
     {
+        // 1. Strict IP validation
+        if (!IPAddress.TryParse(primaryIp.Trim(), out var parsedPrimary))
+        {
+            return false;
+        }
+
+        string cleanPrimary = parsedPrimary.ToString();
+        string cleanSecondary = "";
+
+        if (!string.IsNullOrWhiteSpace(secondaryIp))
+        {
+            if (!IPAddress.TryParse(secondaryIp.Trim(), out var parsedSecondary))
+            {
+                return false;
+            }
+            cleanSecondary = parsedSecondary.ToString();
+        }
+
+        // 2. Strict adapter name validation against command injection
+        if (!applyToAll && !string.IsNullOrWhiteSpace(specificAdapter))
+        {
+            if (!SafeAdapterNameRegex.IsMatch(specificAdapter))
+            {
+                return false;
+            }
+        }
+
         return await Task.Run(() =>
         {
             try
@@ -65,16 +100,16 @@ public sealed class NetworkAdapterService
                 string script;
                 if (applyToAll || string.IsNullOrWhiteSpace(specificAdapter))
                 {
-                    script = $"$adapters = Get-NetAdapter | Where-Object {{ $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }}; " +
+                    script = "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
                              $"foreach ($a in $adapters) {{ " +
-                             $"    netsh interface ipv4 set dnsservers name=$a.Name source=static address='{primaryIp}' validate=no; " +
-                             $"    if ('{secondaryIp}' -ne '') {{ netsh interface ipv4 add dnsservers name=$a.Name address='{secondaryIp}' index=2 validate=no }}; " +
+                             $"    netsh interface ipv4 set dnsservers name=$a.Name source=static address='{cleanPrimary}' validate=no; " +
+                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"    netsh interface ipv4 add dnsservers name=$a.Name address='{cleanSecondary}' index=2 validate=no; ") +
                              $"}}; ipconfig /flushdns";
                 }
                 else
                 {
-                    script = $"netsh interface ipv4 set dnsservers name='{specificAdapter}' source=static address='{primaryIp}' validate=no; " +
-                             $"if ('{secondaryIp}' -ne '') {{ netsh interface ipv4 add dnsservers name='{specificAdapter}' address='{secondaryIp}' index=2 validate=no }}; " +
+                    script = $"netsh interface ipv4 set dnsservers name='{specificAdapter}' source=static address='{cleanPrimary}' validate=no; " +
+                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"netsh interface ipv4 add dnsservers name='{specificAdapter}' address='{cleanSecondary}' index=2 validate=no; ") +
                              $"ipconfig /flushdns";
                 }
 
@@ -88,8 +123,19 @@ public sealed class NetworkAdapterService
         });
     }
 
+    /// <summary>
+    /// Resets DNS securely with adapter name validation.
+    /// </summary>
     public async Task<bool> ResetDnsAsync(string? specificAdapter, bool applyToAll)
     {
+        if (!applyToAll && !string.IsNullOrWhiteSpace(specificAdapter))
+        {
+            if (!SafeAdapterNameRegex.IsMatch(specificAdapter))
+            {
+                return false;
+            }
+        }
+
         return await Task.Run(() =>
         {
             try
@@ -115,6 +161,9 @@ public sealed class NetworkAdapterService
         });
     }
 
+    /// <summary>
+    /// Maximizes NIC hardware properties securely.
+    /// </summary>
     public async Task<bool> MaximizeAdaptersAsync()
     {
         return await Task.Run(() =>
@@ -139,18 +188,29 @@ public sealed class NetworkAdapterService
         });
     }
 
+    /// <summary>
+    /// Executes elevated command using absolute system binary path to prevent binary planting (CWE-426).
+    /// </summary>
     private static void RunElevatedCommand(string powershellScript)
     {
+        string systemDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
+        string securePowershellPath = Path.Combine(systemDir, "WindowsPowerShell", "v1.0", "powershell.exe");
+
+        if (!File.Exists(securePowershellPath))
+        {
+            securePowershellPath = "powershell.exe";
+        }
+
         var psi = new ProcessStartInfo
         {
-            FileName = "powershell.exe",
+            FileName = securePowershellPath,
             Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{powershellScript}\"",
             Verb = "RunAs",
             UseShellExecute = true,
             WindowStyle = ProcessWindowStyle.Hidden
         };
 
-        var proc = Process.Start(psi);
+        using var proc = Process.Start(psi);
         proc?.WaitForExit(10000);
     }
 }
