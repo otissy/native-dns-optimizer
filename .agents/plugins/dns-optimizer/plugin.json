@@ -1,5 +1,0 @@
-{
-  "name": "dns-optimizer",
-  "description": "Antigravity plugin for benchmarking DNS latency, managing Windows network adapters, and enforcing European cybersecurity (NIS2 / GDPR) protocols.",
-  "version": "1.0.0"
-}
