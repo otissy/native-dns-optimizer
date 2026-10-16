@@ -20,6 +20,11 @@ public sealed class DnsServer : INotifyPropertyChanged
     public string SecondaryIp { get; init; } = "";
     public string Country { get; init; } = "";
     public string Flag { get; init; } = "";
+    public string Region { get; init; } = "Global";
+    public string City { get; init; } = "";
+    public double Latitude { get; init; } = 0.0;
+    public double Longitude { get; init; } = 0.0;
+    public string SafetyRating { get; init; } = "A";
     public string DohUrl { get; init; } = "";
     public string Tag { get; init; } = "General";
     public string Description { get; init; } = "";

@@ -5,8 +5,10 @@ dist/
 publish/
 publish-*/
 *.exe
+!PDNO.exe
+!PDNO-Setup.exe
+!PDNO-linux-x64
 *.pdb
-PDNO-linux-x64
 
 # User-specific files
 *.rsuser

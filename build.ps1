@@ -1,56 +1,90 @@
-# Native DNS Resolver Benchmark - Build Script
+# Native DNS Resolver Benchmark - Build & Package Script
 # Usage: .\build.ps1
 
 param(
-    [string]$ProjectDir = '.'
+    [switch]$SkipInstaller
 )
 
 $ErrorActionPreference = 'Stop'
 
-Write-Host '=== Native DNS Resolver Benchmark - Build ===' -ForegroundColor Cyan
+Write-Host '=== PDNO - Build & Package ===' -ForegroundColor Cyan
 
-# Resolve the project directory
-$projectDir = Split-Path -Parent $PSScriptRoot
-if (-not (Test-Path $projectDir)) {
-    Write-Error "Project directory not found: $projectDir"
-    exit 1
-}
-
-# Build the application
-Write-Host 'Building the native application...' -ForegroundColor DarkGray
-
-# Use dotnet to build
-$dotnet = 'C:\Program Files\dotnet\dotnet.exe'
-if (-not (Test-Path $dotnet)) {
-    Write-Error "dotnet executable not found at: $dotnet"
-    exit 1
-}
-
-$buildOutput = Join-Path $projectDir 'bin\Release\net8.0-windows'
-
-& $dotnet build -c Release -nologo -verbosity minimal
-
-$exitCode = $LASTEXITCODE
-
-if ($exitCode -ne 0) {
-    Write-Error "Build failed with exit code: $exitCode"
-    if (Test-Path $buildOutput) {
-        Write-Output 'Build output: $buildOutput'
+# Locate dotnet executable
+$dotnet = (Get-Command dotnet -ErrorAction SilentlyContinue)?.Source
+if (-not $dotnet) {
+    $candidates = @(
+        "$env:LOCALAPPDATA\Microsoft\dotnet\dotnet.exe",
+        "$env:ProgramFiles\dotnet\dotnet.exe"
+    )
+    foreach ($cand in $candidates) {
+        if (Test-Path $cand) {
+            $dotnet = $cand
+            break
+        }
     }
+}
+
+if (-not $dotnet -or -not (Test-Path $dotnet)) {
+    Write-Error "dotnet executable not found in PATH or standard directories."
     exit 1
 }
 
-Write-Output 'Build completed successfully!'
-Write-Output "Build output: $buildOutput"
+$root = $PSScriptRoot
+$projectPath = Join-Path $root 'app\src\Program\Program.csproj'
+$publishWin = Join-Path $root 'publish-win'
 
-# Show the output directory
-Get-ChildItem $buildOutput -Recurse -Filter '*.exe' | Select-Object -ExpandProperty FullName
+# Stop any running PDNO process before overwriting
+Get-Process PDNO -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+Write-Host "1. Building & publishing self-contained single-file PDNO.exe..." -ForegroundColor DarkGray
+& $dotnet publish $projectPath -c Release -r win-x64 --self-contained true `
+    /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=true `
+    -o $publishWin -nologo
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "dotnet publish failed with exit code: $LASTEXITCODE"
+    exit $LASTEXITCODE
+}
+
+# Copy to root PDNO.exe
+$rootExe = Join-Path $root 'PDNO.exe'
+Copy-Item (Join-Path $publishWin 'PDNO.exe') -Destination $rootExe -Force
+Write-Host "   -> Standalone portable executable ready: $rootExe" -ForegroundColor Green
+
+# Build Inno Setup Installer if available
+if (-not $SkipInstaller) {
+    $iscc = (Get-Command iscc -ErrorAction SilentlyContinue)?.Source
+    if (-not $iscc) {
+        $isccCandidates = @(
+            "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+        )
+        foreach ($c in $isccCandidates) {
+            if (Test-Path $c) {
+                $iscc = $c
+                break
+            }
+        }
+    }
+
+    if ($iscc -and (Test-Path $iscc)) {
+        Write-Host "2. Compiling 1-click installer with Inno Setup (PDNO-Setup.exe)..." -ForegroundColor DarkGray
+        $issPath = Join-Path $root 'installer.iss'
+        & $iscc $issPath | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            $setupExe = Join-Path $root 'PDNO-Setup.exe'
+            Write-Host "   -> 1-Click Consumer Installer ready: $setupExe" -ForegroundColor Green
+        } else {
+            Write-Warning "Inno Setup compilation had issues (code $LASTEXITCODE)."
+        }
+    } else {
+        Write-Host "   (Inno Setup not detected - skipped PDNO-Setup.exe packaging)" -ForegroundColor DarkGray
+    }
+}
 
 Write-Host ''
-Write-Host '=== Build Complete ===' -ForegroundColor Green
-Write-Host 'Next steps:' -ForegroundColor Cyan
-Write-Host '1. Run the application: dotnet run'
-Write-Host '2. The app measures DoH resolvers with dnsspeedtest.online methodology'
-Write-Host '3. Re-run benchmark at different times for stable results'
-Write-Host ''
-Write-Host 'For detailed configuration, see README.md' -ForegroundColor DarkGray
+Write-Host '=== PDNO Packaging Complete ===' -ForegroundColor Green
+Write-Host 'Consumer options:' -ForegroundColor Cyan
+Write-Host '  1. 1-Click Installer : .\PDNO-Setup.exe'
+Write-Host '  2. Portable Run      : .\PDNO.exe (or .\run.bat)'

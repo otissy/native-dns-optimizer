@@ -58,11 +58,19 @@ Set the primary and secondary DNS on your router gateway (`http://192.168.1.1` o
 
 ---
 
-## Standalone Executables (Zero Install Required)
+## Consumer-Friendly Downloads & Installation
 
-### 🪟 Windows 10 / 11 (GUI Application)
-- **File**: `PDNO.exe` (or run `run.bat`)
-- Single-file native executable with dark theme, real-time metrics, EU NIS2/GDPR filter, and **🎮 PS5 / Xbox** guide.
+### 🪟 Windows 10 & 11 (GUI Application)
+
+#### 🚀 Option A: 1-Click Consumer Installer (Recommended)
+- **Installer**: `PDNO-Setup.exe`
+- **Zero build or SDK required**: Download and double-click `PDNO-Setup.exe` to install.
+- Adds Start Menu shortcut, Desktop icon, and full Windows uninstaller support.
+- Automatically launches upon install.
+
+#### ⚡ Option B: Standalone Portable (Zero Install)
+- **Executable**: `PDNO.exe` (or launch via `run.bat`)
+- 100% self-contained single-file portable binary. No installation or .NET runtime needed. Just double-click to run anywhere.
 
 ### 🐧 Linux (CLI Executable)
 - **File**: `PDNO-linux-x64`
