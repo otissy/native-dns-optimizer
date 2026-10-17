@@ -1,0 +1,34 @@
+# Closed source - ignore development source and build tooling
+app/
+build.bat
+build.ps1
+build-package.ps1
+installer.iss
+publish/
+publish-*/
+bin/
+obj/
+dist/
+
+# Distribution executables and binaries
+*.exe
+!PDNO.exe
+!PDNO-Setup.exe
+!PDNO-linux-x64
+*.pdb
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / IDE
+.vs/
+.vscode/
+*.swp
+*.lock
+
+# Logs
+*.log
