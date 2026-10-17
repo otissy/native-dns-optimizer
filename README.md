@@ -7,6 +7,7 @@
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20PlayStation%20%7C%20Xbox-blue" alt="Platform" />
     <img src="https://img.shields.io/badge/Console-PS5%20%7C%20PS4%20%7C%20Xbox%20Series%20X%7CS%20%7C%20Xbox%20One-brightgreen" alt="Console Support" />
     <img src="https://img.shields.io/badge/Compliance-EU%20NIS2%20%26%20GDPR-green" alt="EU NIS2 & GDPR" />
+    <img src="https://img.shields.io/badge/Security-Script%20Shield%20%26%20Anti--Tamper-blueviolet" alt="Script Shield" />
     <img src="https://img.shields.io/badge/Dependency-Zero%20(Standalone)-emerald" alt="Zero Dependencies" />
     <img src="https://img.shields.io/badge/License-MIT-purple" alt="License" />
   </p>
@@ -89,6 +90,24 @@ Set the primary and secondary DNS on your router gateway (`http://192.168.1.1` o
 ## 26 Supported Global DNS Resolvers
 
 Cloudflare, Google Public, Quad9, Control D, AdGuard, DNS.SB, CleanBrowsing, NextDNS, DNS4EU, OpenBLD, Canadian Shield, Digitale Gesellschaft, DNS for Family, Restena, IIJ, LibreDNS, Switch, Applied Privacy, UncensoredDNS, RethinkDNS, FlashStart, Comcast Xfinity, AliDNS, DNSPod, 360 Secure, OpenDNS.
+
+---
+
+## 🛡️ Security Hardening & Anti-Tamper Protection
+
+PDNO incorporates multi-layered defense-in-depth protections to ensure untrusted or foreign scripts cannot compromise the application or system:
+
+1. **Script Shield & Directory Audit**:
+   - On startup, `SecurityShieldService` audits the execution directory for suspicious or unauthorized scripts (`.vbs`, `.js`, `.hta`, `.scr`, untrusted `.ps1` / `.bat`).
+   - If rogue files are detected, execution is isolated and a security alert is triggered.
+2. **DLL & Binary Planting Defenses (CWE-426)**:
+   - Uses Windows Kernel `SetDllDirectory("")` and `SetDefaultDllDirectories` to permanently strip the Current Working Directory and untrusted locations from the DLL search order.
+3. **Elevated Execution Hardening (CWE-78)**:
+   - All elevated adapter operations strictly invoke system-pinned binaries (`$env:SystemRoot\System32\netsh.exe` and `ipconfig.exe`).
+   - Process execution forces `WorkingDirectory = System32` so local files are never resolved by relative paths.
+   - Script commands are strictly validated against an internal allowlist and encoded in Base64 (`-EncodedCommand`) to eliminate quoting breakout.
+4. **Batch & Shell Isolation (`run.bat`)**:
+   - `run.bat` enforces isolated system PATH (`%SystemRoot%\System32`), verifies binary authenticity, and pre-checks for unauthorized script payloads.
 
 ---
 

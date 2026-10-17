@@ -146,11 +146,18 @@ public static class Program
         Console.WriteLine();
         Console.WriteLine($"Applying static DNS {winner.PrimaryIp} ({winner.SecondaryIp}) to system...");
 
+        if (!System.Net.IPAddress.TryParse(winner.PrimaryIp, out _) ||
+            (!string.IsNullOrEmpty(winner.SecondaryIp) && !System.Net.IPAddress.TryParse(winner.SecondaryIp, out _)))
+        {
+            Console.WriteLine("[Security Error] Invalid IP address format detected. Aborting command execution.");
+            return;
+        }
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             try
             {
-                // Try systemd-resolved (resolvectl)
+                // Try systemd-resolved (resolvectl) with validated IP arguments
                 var p = Process.Start("resolvectl", $"dns $(ip route show default | awk '{{print $5}}') {winner.PrimaryIp} {winner.SecondaryIp}");
                 p?.WaitForExit(5000);
                 Console.WriteLine("[Success] DNS applied via systemd-resolved (resolvectl).");

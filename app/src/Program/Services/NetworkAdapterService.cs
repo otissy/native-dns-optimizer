@@ -100,17 +100,21 @@ public sealed class NetworkAdapterService
                 string script;
                 if (applyToAll || string.IsNullOrWhiteSpace(specificAdapter))
                 {
-                    script = "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
-                             $"foreach ($a in $adapters) {{ " +
-                             $"    netsh interface ipv4 set dnsservers name=$a.Name source=static address='{cleanPrimary}' validate=no; " +
-                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"    netsh interface ipv4 add dnsservers name=$a.Name address='{cleanSecondary}' index=2 validate=no; ") +
-                             $"}}; ipconfig /flushdns";
+                    script = "$netsh = Join-Path $env:SystemRoot 'System32\\netsh.exe'; " +
+                             "$ipconfig = Join-Path $env:SystemRoot 'System32\\ipconfig.exe'; " +
+                             "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
+                             "foreach ($a in $adapters) { " +
+                             $"    & $netsh interface ipv4 set dnsservers name=$a.Name source=static address='{cleanPrimary}' validate=no; " +
+                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"    & $netsh interface ipv4 add dnsservers name=$a.Name address='{cleanSecondary}' index=2 validate=no; ") +
+                             "}; & $ipconfig /flushdns";
                 }
                 else
                 {
-                    script = $"netsh interface ipv4 set dnsservers name='{specificAdapter}' source=static address='{cleanPrimary}' validate=no; " +
-                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"netsh interface ipv4 add dnsservers name='{specificAdapter}' address='{cleanSecondary}' index=2 validate=no; ") +
-                             $"ipconfig /flushdns";
+                    script = "$netsh = Join-Path $env:SystemRoot 'System32\\netsh.exe'; " +
+                             "$ipconfig = Join-Path $env:SystemRoot 'System32\\ipconfig.exe'; " +
+                             $"& $netsh interface ipv4 set dnsservers name='{specificAdapter}' source=static address='{cleanPrimary}' validate=no; " +
+                             (string.IsNullOrEmpty(cleanSecondary) ? "" : $"& $netsh interface ipv4 add dnsservers name='{specificAdapter}' address='{cleanSecondary}' index=2 validate=no; ") +
+                             "& $ipconfig /flushdns";
                 }
 
                 RunElevatedCommand(script);
@@ -143,12 +147,16 @@ public sealed class NetworkAdapterService
                 string script;
                 if (applyToAll || string.IsNullOrWhiteSpace(specificAdapter))
                 {
-                    script = "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
-                             "foreach ($a in $adapters) { netsh interface ipv4 set dnsservers name=$a.Name source=dhcp }; ipconfig /flushdns";
+                    script = "$netsh = Join-Path $env:SystemRoot 'System32\\netsh.exe'; " +
+                             "$ipconfig = Join-Path $env:SystemRoot 'System32\\ipconfig.exe'; " +
+                             "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
+                             "foreach ($a in $adapters) { & $netsh interface ipv4 set dnsservers name=$a.Name source=dhcp }; & $ipconfig /flushdns";
                 }
                 else
                 {
-                    script = $"netsh interface ipv4 set dnsservers name='{specificAdapter}' source=dhcp; ipconfig /flushdns";
+                    script = "$netsh = Join-Path $env:SystemRoot 'System32\\netsh.exe'; " +
+                             "$ipconfig = Join-Path $env:SystemRoot 'System32\\ipconfig.exe'; " +
+                             $"& $netsh interface ipv4 set dnsservers name='{specificAdapter}' source=dhcp; & $ipconfig /flushdns";
                 }
 
                 RunElevatedCommand(script);
@@ -162,7 +170,7 @@ public sealed class NetworkAdapterService
     }
 
     /// <summary>
-    /// Maximizes NIC hardware properties securely.
+    /// Maximizes NIC hardware properties securely using verified system binaries.
     /// </summary>
     public async Task<bool> MaximizeAdaptersAsync()
     {
@@ -170,16 +178,17 @@ public sealed class NetworkAdapterService
         {
             try
             {
-                string script = "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
+                string script = "$netsh = Join-Path $env:SystemRoot 'System32\\netsh.exe'; " +
+                                "$adapters = Get-NetAdapter | Where-Object { $_.PhysicalMediaType -ne 'Unspecified' -and $_.InterfaceDescription -notlike '*Virtual*' -and $_.InterfaceDescription -notlike '*Hyper-V*' -and $_.Name -notlike '*Tailscale*' }; " +
                                 "$props = @('Green Ethernet', 'Power Saving Mode', 'Gigabit Lite', 'Energy-Efficient Ethernet', 'Advanced EEE'); " +
                                 "foreach ($a in $adapters) { " +
                                 "    foreach ($p in $props) { Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName $p -DisplayValue 'Disabled' -ErrorAction SilentlyContinue }; " +
                                 "    Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Receive Side Scaling' -DisplayValue 'Enabled' -ErrorAction SilentlyContinue; " +
                                 "}; " +
-                                "netsh int tcp set global autotuninglevel=normal; " +
-                                "netsh int tcp set global rss=enabled; " +
-                                "netsh int tcp set global fastopen=enabled; " +
-                                "netsh int tcp set heuristics disabled";
+                                "& $netsh int tcp set global autotuninglevel=normal; " +
+                                "& $netsh int tcp set global rss=enabled; " +
+                                "& $netsh int tcp set global fastopen=enabled; " +
+                                "& $netsh int tcp set heuristics disabled";
 
                 RunElevatedCommand(script);
                 return true;
@@ -192,24 +201,40 @@ public sealed class NetworkAdapterService
     }
 
     /// <summary>
-    /// Executes elevated command using absolute system binary path to prevent binary planting (CWE-426).
+    /// Executes elevated command using verified system binary path, Base64 EncodedCommand,
+    /// System32 working directory isolation, and strict script validation to prevent CWE-426 & CWE-78.
     /// </summary>
     private static void RunElevatedCommand(string powershellScript)
     {
+        // 1. Validate script against injection and dangerous primitives
+        if (!SecurityShieldService.ValidateInternalScript(powershellScript))
+        {
+            throw new UnauthorizedAccessException("Blocked attempt to execute unauthorized command sequence.");
+        }
+
         string systemDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
         string securePowershellPath = Path.Combine(systemDir, "WindowsPowerShell", "v1.0", "powershell.exe");
 
         if (!File.Exists(securePowershellPath))
         {
-            securePowershellPath = "powershell.exe";
+            securePowershellPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "WindowsPowerShell", "v1.0", "powershell.exe");
+            if (!File.Exists(securePowershellPath))
+            {
+                throw new FileNotFoundException("Secure PowerShell system executable not found in System32.");
+            }
         }
+
+        // 2. Encode script in Base64 (Unicode / UTF-16LE) to completely eliminate argument breakout / shell injection
+        byte[] scriptBytes = System.Text.Encoding.Unicode.GetBytes(powershellScript);
+        string encodedCommand = Convert.ToBase64String(scriptBytes);
 
         var psi = new ProcessStartInfo
         {
             FileName = securePowershellPath,
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{powershellScript}\"",
+            Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {encodedCommand}",
             Verb = "RunAs",
             UseShellExecute = true,
+            WorkingDirectory = systemDir, // Critical: Enforce System32 so no local unverified binaries/scripts are ever resolved
             WindowStyle = ProcessWindowStyle.Hidden
         };
 

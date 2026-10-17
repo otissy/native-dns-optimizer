@@ -14,6 +14,21 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // 1. Enforce Windows process mitigations (strip CWD from DLL search order, prevent DLL planting CWE-426)
+        SecurityShieldService.ApplyProcessMitigations();
+
+        // 2. Audit directory integrity against foreign or untrusted scripts
+        var threats = SecurityShieldService.AuditDirectoryIntegrity();
+        if (threats.Count > 0)
+        {
+            string message = "PDNO Security Shield Warning:\n\n" +
+                             string.Join("\n", threats) +
+                             "\n\nForeign scripts detected in application folder. PDNO has isolated and blocked untrusted script execution.";
+            MessageBox.Show(message, "PDNO Security Shield Alert", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Shutdown(1);
+            return;
+        }
+
         if (e.Args.Contains("--test"))
         {
             AttachConsole(ATTACH_PARENT_PROCESS);
@@ -55,3 +70,4 @@ public partial class App : Application
         mainWin.Show();
     }
 }
+

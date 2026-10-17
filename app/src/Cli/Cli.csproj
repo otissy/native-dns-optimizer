@@ -15,6 +15,7 @@
     <Compile Include="..\Program\Models\DnsServer.cs" Link="Models\DnsServer.cs" />
     <Compile Include="..\Program\Services\DnsCatalog.cs" Link="Services\DnsCatalog.cs" />
     <Compile Include="..\Program\Services\DnsBenchmarkService.cs" Link="Services\DnsBenchmarkService.cs" />
+    <Compile Include="..\Program\Services\SecurityShieldService.cs" Link="Services\SecurityShieldService.cs" />
   </ItemGroup>
 
 </Project>

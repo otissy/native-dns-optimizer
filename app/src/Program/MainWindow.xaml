@@ -304,6 +304,9 @@
                     <Border Background="#14532d" BorderBrush="#16a34a" BorderThickness="1" CornerRadius="12" Margin="8,0,0,0" Padding="8,2">
                         <TextBlock Text="🛡️ EU NIS2 &amp; GDPR Compliant" FontSize="11" Foreground="#86efac" FontWeight="SemiBold"/>
                     </Border>
+                    <Border Background="#0f172a" BorderBrush="#0284c7" BorderThickness="1" CornerRadius="12" Margin="8,0,0,0" Padding="8,2">
+                        <TextBlock Text="🔒 Script Shield Active" FontSize="11" Foreground="#7dd3fc" FontWeight="SemiBold"/>
+                    </Border>
                 </StackPanel>
                 <TextBlock Text="Benchmark latency, jitter, and recursion across safe DNS providers. Set static DNS to eliminate router lag." 
                            Foreground="#8b949e" FontSize="13" Margin="34,4,0,0"/>
@@ -577,7 +580,7 @@
 
                 <TextBlock x:Name="NotificationText" Text="Static DNS mode active. Automatic DHCP is disabled." 
                            Foreground="#8b949e" FontSize="12" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="1" Text="NIS2 &amp; GDPR Compliant • Zero Telemetry" 
+                <TextBlock Grid.Column="1" Text="NIS2 &amp; GDPR Compliant • Script Shield Active • Zero Telemetry" 
                            Foreground="#10b981" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
             </Grid>
         </Border>
